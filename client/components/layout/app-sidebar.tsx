@@ -1,7 +1,9 @@
 "use client"
 
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Gauge, UserRound, Settings, LogOut } from 'lucide-react'
+import { logout } from "@/lib/api"
 import {
   Sidebar,
   SidebarContent,
@@ -16,6 +18,14 @@ import {
 } from "@/components/ui/sidebar"
 
 export function AppSidebar() {
+  const router = useRouter()
+  async function handleSignOut() {
+    try {
+      await logout()
+    } finally {
+      router.replace("/auth/login")
+    }
+  }
   const items = [
     { title: "Dashboard", href: "/dashboard", icon: Gauge },
     { title: "Profile", href: "/profile", icon: UserRound },
@@ -39,11 +49,9 @@ export function AppSidebar() {
                 </SidebarMenuItem>
               ))}
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href="/login">
-                    <LogOut />
-                    <span>{"Sign out"}</span>
-                  </Link>
+                <SidebarMenuButton onClick={handleSignOut}>
+                  <LogOut />
+                  <span>{"Sign out"}</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
