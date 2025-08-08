@@ -1,6 +1,6 @@
 ## FSD Assignment — Full‑Stack Dashboard (Next.js + Fastify)
 
-Loom walkthrough: https://www.loom.com/share/REPLACE_WITH_VIDEO_ID
+Loom walkthrough: https://www.loom.com/share/dcf9309e2f7a49a58e48fc8e080c2603?sid=9e44abe7-20df-444f-acd2-7a97ee1ec432
 
 ### Overview
 
