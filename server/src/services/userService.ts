@@ -83,7 +83,23 @@ class UserService {
     if (filters?.from || filters?.to) {
       match.createdAt = {} as any;
       if (filters.from) (match.createdAt as any).$gte = filters.from;
-      if (filters.to) (match.createdAt as any).$lte = filters.to;
+      if (filters.to) {
+        // Treat "to" as inclusive end-of-day. Convert to an exclusive upper bound.
+        const end = new Date(filters.to);
+        const isMidnight =
+          end.getUTCHours() === 0 &&
+          end.getUTCMinutes() === 0 &&
+          end.getUTCSeconds() === 0 &&
+          end.getUTCMilliseconds() === 0;
+        if (isMidnight) {
+          // Move to the next day 00:00 UTC and use $lt
+          end.setUTCDate(end.getUTCDate() + 1);
+        } else {
+          // Add 1ms to make it exclusive upper bound
+          end.setUTCMilliseconds(end.getUTCMilliseconds() + 1);
+        }
+        (match.createdAt as any).$lt = end;
+      }
     }
     if (filters?.role) {
       match.role = filters.role;
