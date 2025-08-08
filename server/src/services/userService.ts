@@ -53,11 +53,15 @@ class UserService {
   }
 
   async getSummaryMetrics(filters?: { from?: Date; to?: Date; role?: string; q?: string }) {
-    const match = this.buildUserMatchQuery(filters);
-    const totalUsers = await UserModel.countDocuments(match);
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    const last7Match = this.buildUserMatchQuery({ ...filters, from: filters?.from || sevenDaysAgo });
-    const last7Days = await UserModel.countDocuments(last7Match);
+    // Total users with optional role/q filters applied
+    const totalUsers = await UserModel.countDocuments(this.buildUserMatchQuery({ role: filters?.role, q: filters?.q }));
+
+    // Respect the requested range if provided; otherwise default to last 7 days
+    const rangeFrom = filters?.from ?? new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const rangeTo = filters?.to ?? new Date();
+    const rangeMatch = this.buildUserMatchQuery({ from: rangeFrom, to: rangeTo, role: filters?.role, q: filters?.q });
+    const last7Days = await UserModel.countDocuments(rangeMatch);
+
     return { totalUsers, last7Days };
   }
 
@@ -100,8 +104,9 @@ class UserService {
     return UserModel.find().limit(200).sort({ createdAt: -1 });
   }
 
-  async listRecentUsers(limit = 10) {
-    return UserModel.find({}, { email: 1, firstName: 1, lastName: 1, avatar: 1, role: 1, createdAt: 1 })
+  async listRecentUsers(limit = 10, filters?: { from?: Date; to?: Date; role?: string; q?: string }) {
+    const match = this.buildUserMatchQuery(filters);
+    return UserModel.find(match, { email: 1, firstName: 1, lastName: 1, avatar: 1, role: 1, createdAt: 1 })
       .sort({ createdAt: -1 })
       .limit(limit);
   }

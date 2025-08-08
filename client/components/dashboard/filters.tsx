@@ -40,7 +40,7 @@ export default function DashboardFilters() {
                 ? "Last 30 days"
                 : "Last 90 days"
               : from && to
-              ? `${from.toLocaleDateString()} - ${to.toLocaleDateString()}`
+               ? `${from.toLocaleDateString()} - ${to.toLocaleDateString()}`
               : "Select dates…"}
           </Button>
         </PopoverTrigger>
@@ -96,7 +96,7 @@ export default function DashboardFilters() {
         </PopoverContent>
       </Popover>
 
-      <Select value={role} onValueChange={(v: string) => setRole(v as "all" | "admin" | "teacher" | "user")}>
+       <Select value={role} onValueChange={(v: string) => setRole(v as "all" | "admin" | "teacher" | "user")}>
         <SelectTrigger className="w-[160px]">
           <SelectValue placeholder="Role" />
         </SelectTrigger>

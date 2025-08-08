@@ -60,8 +60,23 @@ export default async function dashboardRoutes(server: FastifyInstance) {
     return reply.send({ roles: data });
   });
 
-  server.get("/recent-users", { preValidation: [server.authenticate] }, async (_request, reply) => {
-    const users = await userService.listRecentUsers(8);
+  server.get("/recent-users", { preValidation: [server.authenticate] }, async (request, reply) => {
+    const schema = z.object({
+      from: z.string().datetime().optional(),
+      to: z.string().datetime().optional(),
+      role: z.string().optional(),
+      q: z.string().optional(),
+      limit: z.coerce.number().optional(),
+    });
+    const query = schema.safeParse(request.query);
+    if (!query.success) return reply.code(400).send({ message: "Invalid query" });
+    const { from, to, role, q, limit } = query.data;
+    const users = await userService.listRecentUsers(limit ?? 8, {
+      from: from ? new Date(from) : undefined,
+      to: to ? new Date(to) : undefined,
+      role,
+      q,
+    });
     return reply.send({ users });
   });
 }

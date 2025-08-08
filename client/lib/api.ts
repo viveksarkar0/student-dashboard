@@ -34,6 +34,12 @@ function fullUrlIfRelative(url?: string | null) {
   return `${baseUrl()}${url}`
 }
 
+function withCacheBuster(url?: string | null) {
+  if (!url) return undefined
+  const sep = url.includes("?") ? "&" : "?"
+  return `${url}${sep}v=${Date.now()}`
+}
+
 function joinName(first?: string, last?: string) {
   return [first || "", last || ""].join(" ").trim()
 }
@@ -54,7 +60,7 @@ function normalizeUserPayload(payload: unknown): Me {
     name: joinName(user?.firstName, user?.lastName),
     email: user?.email || "",
     bio: user?.bio,
-    avatarUrl: fullUrlIfRelative(user?.avatar),
+    avatarUrl: withCacheBuster(fullUrlIfRelative(user?.avatar)),
   }
 }
 
@@ -167,8 +173,15 @@ export type RecentUser = {
 
 export type RecentLogin = RecentUser
 
-export async function getRecentUsers(): Promise<RecentUser[]> {
-  const data = await request("/v1/dashboard/recent-users")
+export async function getRecentUsers(filters?: { from?: string; to?: string; role?: string; q?: string; limit?: number }): Promise<RecentUser[]> {
+  const params = new URLSearchParams()
+  if (filters?.from) params.set("from", new Date(filters.from).toISOString())
+  if (filters?.to) params.set("to", new Date(filters.to).toISOString())
+  if (filters?.role) params.set("role", filters.role)
+  if (filters?.q) params.set("q", filters.q)
+  if (filters?.limit) params.set("limit", String(filters.limit))
+  const qs = params.toString()
+  const data = await request(`/v1/dashboard/recent-users${qs ? `?${qs}` : ""}`)
   type ServerRecentUser = {
     _id?: string
     id?: string
@@ -183,15 +196,15 @@ export async function getRecentUsers(): Promise<RecentUser[]> {
     id: String(u?._id || u?.id || ""),
     name: joinName(u?.firstName, u?.lastName),
     email: u?.email || "",
-    avatarUrl: fullUrlIfRelative(u?.avatar),
+    avatarUrl: withCacheBuster(fullUrlIfRelative(u?.avatar)),
     at: u?.createdAt ? new Date(u.createdAt).toISOString() : new Date().toISOString(),
   }))
 }
 
 // There is no dedicated recent-logins endpoint on the server.
 // Reuse recent users as a proxy for recent login activity.
-export async function getRecentLogins(): Promise<RecentLogin[]> {
-  const users = await getRecentUsers()
+export async function getRecentLogins(filters?: { from?: string; to?: string; role?: string; q?: string; limit?: number }): Promise<RecentLogin[]> {
+  const users = await getRecentUsers(filters)
   return users
 }
 

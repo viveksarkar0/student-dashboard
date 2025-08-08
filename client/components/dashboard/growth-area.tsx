@@ -12,7 +12,7 @@ type Row = { label: string; users: number }
 
 export default function GrowthArea({ className = "" }: { className?: string }) {
   const [growth, setGrowth] = useState<Row[]>([])
-  const { toApi } = useDashboardFilters()
+  const { toApi, state } = useDashboardFilters()
 
   useEffect(() => {
     let ignore = false
@@ -39,7 +39,7 @@ export default function GrowthArea({ className = "" }: { className?: string }) {
       }
     })()
     return () => { ignore = true }
-  }, [toApi])
+  }, [toApi, state.preset, state.from, state.to, state.role, state.q])
 
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className={`min-w-0 ${className}`}>

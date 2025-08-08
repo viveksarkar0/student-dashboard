@@ -78,12 +78,12 @@ export default function ProfileForm() {
     try {
       const url = await uploadAvatar(file)
       // Bust cache to ensure the browser fetches the new image immediately
-      setAvatarUrl(`${url}?v=${Date.now()}`)
+      setAvatarUrl(`${url}`)
       setFile(null) // Clear the file input
       setMsg("Avatar updated.")
       // Refresh profile from server to persist in local state
       const me = await getMe()
-      setAvatarUrl(me.avatarUrl || url)
+      setAvatarUrl(me.avatarUrl || `${url}`)
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Avatar upload failed")
     } finally {

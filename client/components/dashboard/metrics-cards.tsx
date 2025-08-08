@@ -38,7 +38,7 @@ export default function MetricsCards() {
   }, [toApi, state.preset, state.from, state.to, state.role, state.q])
 
   const items = [
-    { title: "Recent Signups (7d)", icon: Eye, value: metrics.signups7d.toLocaleString(), hint: "new users this week" },
+    { title: state.preset === 'custom' ? "Signups (range)" : "Recent Signups (7d)", icon: Eye, value: metrics.signups7d.toLocaleString(), hint: state.preset === 'custom' ? 'within selected range' : 'new users this week' },
     { title: "Total Users", icon: Users, value: metrics.totalUsers.toLocaleString(), hint: "all registered users" },
     { title: "Daily Average", icon: TrendingUp, value: metrics.avgPerDay.toLocaleString(), hint: "signups per day" },
   ]

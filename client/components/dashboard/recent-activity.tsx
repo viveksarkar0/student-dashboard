@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { AreaChart, Area, XAxis, YAxis } from "recharts"
 import { getRecentLogins, getRecentUsers, type RecentLogin, type RecentUser } from "@/lib/api"
+import { useDashboardFilters } from "@/hooks/useDashboardFilters"
 import ChartResize from "@/components/chart-resize"
 
 function timeAgo(iso: string) {
@@ -23,11 +24,19 @@ export default function RecentActivity({ className = "" }: { className?: string 
   const [logins, setLogins] = useState<RecentLogin[]>([])
   const [users, setUsers] = useState<RecentUser[]>([])
   const [spark, setSpark] = useState<{ label: string; value: number }[]>([])
+  const { state } = useDashboardFilters()
 
   useEffect(() => {
     let ignore = false
     ;(async () => {
-      const [l, u] = await Promise.all([getRecentLogins(), getRecentUsers()])
+      const filterParams = {
+        from: state.from?.toISOString(),
+        to: state.to?.toISOString(),
+        role: state.role === 'all' ? undefined : state.role,
+        q: state.q || undefined,
+        limit: 8,
+      }
+      const [l, u] = await Promise.all([getRecentLogins(filterParams), getRecentUsers(filterParams)])
       if (ignore) return
       setLogins(l)
       setUsers(u)
@@ -35,7 +44,7 @@ export default function RecentActivity({ className = "" }: { className?: string 
       setSpark(labels.map((label) => ({ label, value: Math.round(400 + Math.random() * 600) })))
     })()
     return () => { ignore = true }
-  }, [])
+  }, [state.from, state.to, state.role, state.q])
 
   return (
     <div className={`grid min-w-0 gap-4 md:grid-cols-7 ${className}`}>
