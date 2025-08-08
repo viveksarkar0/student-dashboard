@@ -18,7 +18,8 @@ export default function LoginPage() {
     setError(null)
     try {
       await login({ email, password })
-      router.replace("/dashboard")
+      // middleware will redirect authenticated users away from auth pages
+      router.refresh()
     } catch (err) {
       const message = err instanceof Error ? err.message : "Login failed"
       setError(message)
