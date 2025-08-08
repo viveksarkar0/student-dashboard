@@ -11,6 +11,7 @@ export interface IUser extends Document {
   avatar: string;
   firstName: string;
   lastName: string;
+  bio: string;
   username: string;
   fullName: string;
   email: string;
@@ -40,6 +41,7 @@ const userSchema = new Schema<IUser>(
     },
     firstName: { type: String },
     lastName: { type: String, default: "" },
+    bio: { type: String, default: "" },
     username: {
       type: String,
       get(this: IUser): string {
